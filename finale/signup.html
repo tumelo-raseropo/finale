@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            width: 350px;
+            margin: 30px auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+        .switch-form {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+        .switch-form a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        hr {
+            border: 1px solid #f1f1f1;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <hr>
+        <form id="signup-form">
+            <label><b>Email</b></label>
+            <input type="email" placeholder="Enter Email" id="email" required>
+
+            <label><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" id="password" required minlength="6">
+
+            <label><b>Repeat Password</b></label>
+            <input type="password" placeholder="Repeat Password" id="password2" required>
+            <div id="error" class="error"></div>
+
+            <button type="submit">Sign Up</button>
+        </form>
+        <div class="switch-form">
+            Already have an account? <a href="login.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const password2 = document.getElementById('password2').value;
+            const errorDiv = document.getElementById('error');
+            
+            errorDiv.textContent = '';
+            
+            // Validate passwords
+            if (password !== password2) {
+                errorDiv.textContent = "Passwords don't match!";
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorDiv.textContent = "Password must be at least 6 characters!";
+                return;
+            }
+
+            try {
+                // Save to SheetDB
+                const response = await fetch("https://sheetdb.io/api/v1/5c73ev7sar4xu", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify({
+                        data: [{
+                            email: email,
+                            password: password
+                        }]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.created > 0) {
+                    alert("Account created successfully! Redirecting to login...");
+                    window.location.href = "login.html"; // Go to login page
+                } else {
+                    throw new Error("Signup failed");
+                }
+            } catch (error) {
+                errorDiv.textContent = "Error creating account. Please try again.";
+                console.error("Error:", error);
+            }
+        });
+    </script>
+</body>
+</html>
